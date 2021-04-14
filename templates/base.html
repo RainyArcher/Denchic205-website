@@ -16,7 +16,10 @@
             <a class="navbar-brand" href="http://127.0.0.1:8080/"> <h1>Denchic205 Main</h1></a>
         </div>
         {% if current_user.is_authenticated %}
-        <a class="navbar-brand" href="/logout">{{ current_user.name }} {{ current_user.surname }}</a>
+        <img src="../static/img/avatars/{{current_user.avatar}}" width="75" height="75">
+        <h2>{{ current_user.name }} {{ current_user.surname }}</h2>
+        <a class="btn btn-secondary" href="/settings/{{ current_user.id }}">Settings</a>
+        <a href="/logout" class="btn btn-danger">Log out</a>
         {% else %}
         <p>
             <a class="btn btn-primary " href="/register">Register</a>

@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Регистрация</h1>
-<form action="/register" method="post">
+<h1>{{ title }}</h1>
+<form action="" method="post" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     {{ form.csrf_token }}
+    <p>{{ form.avatar() }} {{ form.avatar.label }}</p>
     <p>
         {{ form.email.label }}<br>
         {{ form.email(class="form-control", type="email") }}<br>

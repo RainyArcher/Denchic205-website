@@ -1,47 +1,39 @@
 {% extends "base.html" %}
-
 {% block content %}
-<style>
-   .post {
-    background: #aaffff;
-    width: 800px;
-    font-size: 14pt;
-   }
-   p {
-   width: 40%;
-   }
-</style>
 <meta charset="UTF-8">
 <h1>Posts</h1>
-    {% if not current_user.is_authenticated%}
-    <h2>Please, register or log in to see the posts</h2>
-    {% elif not posts %}
-    <h2>No posts to show :(</h2>
-    <h2>But you can add one! ^_^</h2>
-    {% endif %}
+{% if not current_user.is_authenticated%}
+<h2>Please, register or log in to see the posts</h2>
+{% elif not posts %}
+<h2>No posts to show :(</h2>
+<h2>But you can add one! ^_^</h2>
+{% else %}
+<hr style="width:45%;margin-left:0">
 {% for post in posts %}
 {% if ((post.is_private and current_user == post.user) or not post.is_private) and current_user.is_authenticated%}
 <h3>{{ post.created_date }}</h3>
-<h2>{{ post.title.capitalize() }}</h2>
-<p>{{ post.content }}</p>
+<h2 style="width:45%;word-wrap:break-word">{{ post.title.capitalize() }}</h2>
+<h5 style="width:45%;word-wrap:break-word">{{ post.content }}</h5>
 <img src="../static/img/{{ post.image }}" height="350" width="500">
-    {% if post.is_private%}
-    <p>Private</p>
-    {% else%}
-    <p>Public</p>
-    {% endif %}
-<h4>Author: {{ post.user.name }} </h4>
+{% if post.is_private%}
+<h5>Private</h5>
+{% else%}
+<h5>Public</h5>
 {% endif %}
-    {% if current_user.is_authenticated and current_user == post.user %}
-    <div>
-        <a href="/posts/{{ post.id }}" class="btn btn-warning">
-            Edit
-        </a>
-        <a href="/post_delete/{{ post.id }}" class="btn btn-danger">
-            Delete
-        </a>
-    </div>
-    {% endif %}
-<br>
+<img src="../static/img/avatars/{{ post.user.avatar }}" height="75" width="75">
+<h4>Author: {{ post.user.name }} {{ post.user.surname }}</h4>
+{% endif %}
+{% if current_user.is_authenticated and current_user == post.user %}
+<div>
+    <a href="/posts/{{ post.id }}" class="btn btn-warning">
+        Edit
+    </a>
+    <a href="/post_delete/{{ post.id }}" class="btn btn-danger">
+        Delete
+    </a>
+</div>
+{% endif %}
+<hr style="width:45%;margin-left:0">
 {% endfor %}
+{% endif%}
 {% endblock %}
