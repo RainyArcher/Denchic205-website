@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 import datetime
 import filecmp
 import random
+import os
 from data import db_session
 from data.posts import Posts
 from forms.posts import PostsForm
@@ -87,7 +88,8 @@ def settings(id):
                                            message="Файл не является изображением")
                 avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).replace(
                     ":", "-") + '.' + avatar.filename.split('.')[-1]
-                # delete
+                if avatar_function(user.avatar) and os.path.isfile('static/img/avatars/' + user.avatar):
+                    os.remove('static/img/avatars/' + user.avatar)
                 avatar.save("static/img/avatars/" + avatar_name)
             else:
                 avatar_name = current_user.avatar
@@ -103,6 +105,7 @@ def settings(id):
             abort(404)
     return render_template('register.html', title='Настройки',
                            form=form)
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -121,7 +124,7 @@ def reqister():
                                    message="Такой пользователь уже есть")
         print('Adding user...')
         if not form.avatar.data:
-            avatar_name = generate_avatar()
+            avatar_name = avatar_function('')
         else:
             avatar = form.avatar.data
             if avatar.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
@@ -130,7 +133,6 @@ def reqister():
                                        message="Файл не является изображением")
             avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).replace(":", "-") + \
                           '.' + avatar.filename.split('.')[-1]
-            # delete
             avatar.save("static/img/avatars/" + avatar_name)
         user = User(
             surname=form.surname.data,
@@ -168,10 +170,14 @@ def delete_user(id):
             user = db_sess.query(User).filter(User.email == form.email.data).first()
             if user and user.check_password(form.password.data):
                 for post in user.posts:
-                    # delete image
+                    if os.path.isfile('static/img/' + post.image) and post.image != 'Empty.jpg':
+                        os.remove('static/img/' + post.image)
                     db_sess.delete(post)
+                    db_sess.commit()
+                print('All posts deleted')
+                if avatar_function(user.avatar) and os.path.isfile('static/img/avatars/' + user.avatar):
+                    os.remove('static/img/avatars/' + user.avatar)
                 db_sess.delete(user)
-                # delete avatar
                 db_sess.commit()
                 return redirect("/")
             return render_template('login.html',
@@ -255,7 +261,8 @@ def edit_post(id):
                 filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
                            image.filename.split('.')[-1]
                 image.save("static/img/" + filename)
-                # delete image
+                if os.path.isfile('static/img/' + posts.image) and posts.image != 'Empty.jpg':
+                    os.remove('static/img/' + posts.image)
                 posts.image = filename
             posts.is_private = form.is_private.data
             db_sess.commit()
@@ -271,19 +278,26 @@ def edit_post(id):
 @login_required
 def post_delete(id):
     db_sess = db_session.create_session()
-    post = db_sess.query(Posts).filter(Posts.id == id).first()
-    if post:
-        db_sess.delete(post)
-        # delete
+    posts = db_sess.query(Posts).filter(Posts.id == id).first()
+    if posts:
+        if os.path.isfile('static/img/' + posts.image) and posts.image != 'Empty.jpg':
+            os.remove('static/img/' + posts.image)
+        db_sess.delete(posts)
         db_sess.commit()
     else:
         abort(404)
     return redirect('/')
 
 
-def generate_avatar():
+def avatar_function(input):
     colors = ['red', 'orange', 'yellow', 'lime', 'green', 'blue', 'dark-blue', 'purple', 'pink', 'grey', 'black']
-    return 'Avatar_' + random.choice(colors) + '.png'
+    if input != '':
+        if input.split('_')[1].split('.')[0] in colors:
+            return False
+        else:
+            return True
+    else:
+        return 'Avatar_' + random.choice(colors) + '.png'
 
 
 def main():

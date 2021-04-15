@@ -5,9 +5,11 @@
 {% if not current_user.is_authenticated%}
 <h2>Please, register or log in to see the posts</h2>
 {% elif not posts %}
+<a href="addPost" class="btn btn-secondary">Add a new post</a>
 <h2>No posts to show :(</h2>
 <h2>But you can add one! ^_^</h2>
 {% else %}
+<a href="addPost" class="btn btn-secondary">Add a new post</a>
 <hr style="width:45%;margin-left:0">
 {% for post in posts %}
 {% if ((post.is_private and current_user == post.user) or not post.is_private) and current_user.is_authenticated%}
@@ -33,7 +35,9 @@
     </a>
 </div>
 {% endif %}
+{% if (post.is_private and current_user == post.user) or not post.is_private %}
 <hr style="width:45%;margin-left:0">
+{% endif %}
 {% endfor %}
 {% endif%}
 {% endblock %}

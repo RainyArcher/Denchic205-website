@@ -29,9 +29,6 @@
     <a class="navbar-brand" href="/Denchic205"><h2>About</h2></a>
     </nav>
 </header>
-{% if current_user.is_authenticated %}
-<a href="addPost" class="btn btn-secondary">Add a new post</a>
-{% endif %}
 <!-- Begin page content -->
 <main role="main" class="container">
     {% block content %}{% endblock %}
