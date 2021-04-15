@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, request, abort
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import datetime
+import filecmp
 import random
 from data import db_session
 from data.posts import Posts
@@ -38,6 +39,7 @@ def login():
 
 @app.route("/")
 def index():
+    filecmp.clear_cache()
     db_sess = db_session.create_session()
     posts = db_sess.query(Posts).all()
     users = db_sess.query(User).all()
@@ -83,8 +85,9 @@ def settings(id):
                     return render_template('register.html', title='Настройки',
                                            form=form,
                                            message="Файл не является изображением")
-                avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).split('.')[0].replace(
+                avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).replace(
                     ":", "-") + '.' + avatar.filename.split('.')[-1]
+                # delete
                 avatar.save("static/img/avatars/" + avatar_name)
             else:
                 avatar_name = current_user.avatar
@@ -125,9 +128,9 @@ def reqister():
                 return render_template('register.html', title='Регистрация',
                                        form=form,
                                        message="Файл не является изображением")
-            avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).split('.')[0].replace(":",
-                                                                                                                 "-") + \
+            avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).replace(":", "-") + \
                           '.' + avatar.filename.split('.')[-1]
+            # delete
             avatar.save("static/img/avatars/" + avatar_name)
         user = User(
             surname=form.surname.data,
@@ -141,6 +144,7 @@ def reqister():
         db_sess.add(user)
         db_sess.commit()
         print('User added')
+        logout_user()
         return redirect('/login')
     return render_template('register.html', title='Регистрация', form=form)
 
@@ -150,6 +154,32 @@ def reqister():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.route('/delete_user/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_user(id):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == id).first()
+    if user:
+        form = LoginForm()
+        if form.validate_on_submit():
+            db_sess = db_session.create_session()
+            user = db_sess.query(User).filter(User.email == form.email.data).first()
+            if user and user.check_password(form.password.data):
+                for post in user.posts:
+                    # delete image
+                    db_sess.delete(post)
+                db_sess.delete(user)
+                # delete avatar
+                db_sess.commit()
+                return redirect("/")
+            return render_template('login.html',
+                                   message="Неправильный логин или пароль",
+                                   form=form)
+        return render_template('login.html', title='Удаление пользователя', form=form)
+    else:
+        abort(404)
 
 
 @app.route('/addPost', methods=['GET', 'POST'])
@@ -176,7 +206,7 @@ def addPost():
                 return render_template('addPost.html', title='Добавление записи',
                                        form=form,
                                        message="Файл не является изображением")
-            filename = 'post ' + str(datetime.datetime.now()).split('.')[0].replace(":", "-") + '.' + \
+            filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
                        image.filename.split('.')[-1]
             image.save("static/img/" + filename)
             posts.image = filename
@@ -222,9 +252,10 @@ def edit_post(id):
                     return render_template('addPost.html', title='Добавление записи',
                                            form=form,
                                            message="Файл не является изображением")
-                filename = 'post ' + str(datetime.datetime.now()).split('.')[0].replace(":", "-") + '.' + \
+                filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
                            image.filename.split('.')[-1]
                 image.save("static/img/" + filename)
+                # delete image
                 posts.image = filename
             posts.is_private = form.is_private.data
             db_sess.commit()
@@ -243,6 +274,7 @@ def post_delete(id):
     post = db_sess.query(Posts).filter(Posts.id == id).first()
     if post:
         db_sess.delete(post)
+        # delete
         db_sess.commit()
     else:
         abort(404)
