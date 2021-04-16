@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <style>
+    .background {
+      background-image: url("../static/img/Website/Background.jpg");
+      background-size:cover;
+    }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -8,30 +14,31 @@
     <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
     <title>{{title}}</title>
 </head>
-<body>
-<header>
-    <nav class="navbar navbar-light bg-light">
-        <div style="display: inline-flex;">
-        <img src="../static/img/My icon.png" width="75" height="75">
-            <a class="navbar-brand" href="http://127.0.0.1:8080/"> <h1>Denchic205 Main</h1></a>
-        </div>
-        {% if current_user.is_authenticated %}
-        <img src="../static/img/avatars/{{current_user.avatar}}" width="75" height="75">
-        <h2>{{ current_user.name }} {{ current_user.surname }}</h2>
-        <a class="btn btn-secondary" href="/settings/{{ current_user.id }}">Settings</a>
-        <a href="/logout" class="btn btn-danger">Log out</a>
-        {% else %}
-        <p>
-            <a class="btn btn-primary " href="/register">Register</a>
-            <a class="btn btn-success" href="/login">Log in</a>
-        </p>
-        {% endif %}
-    <a class="navbar-brand" href="/Denchic205"><h2>About</h2></a>
-    </nav>
-</header>
-<!-- Begin page content -->
-<main role="main" class="container">
-    {% block content %}{% endblock %}
-</main>
-</body>
+<div class="background">
+    <body>
+    <header>
+        <nav class="navbar navbar-light bg-light">
+            <div style="display: inline-flex;">
+                <img src="../static/img/Website/My icon.png" width="75" height="75">
+                <a class="navbar-brand" href="http://127.0.0.1:8080/"><h1>Denchic205 Main</h1></a>
+            </div>
+            {% if current_user.is_authenticated %}
+            <img src="../static/img/avatars/{{current_user.avatar}}" width="75" height="75">
+            <h2>{{ current_user.name }} {{ current_user.surname }}</h2>
+            <a class="btn btn-secondary" href="/settings/{{ current_user.id }}">Settings</a>
+            <a href="/logout" class="btn btn-danger">Log out</a>
+            {% else %}
+            <p>
+                <a class="btn btn-primary " href="/register">Register</a>
+                <a class="btn btn-success" href="/login">Log in</a>
+            </p>
+            {% endif %}
+            <a class="navbar-brand" href="/Denchic205"><h2>About</h2></a>
+        </nav>
+    </header>
+    <main role="main">
+        {% block content %}{% endblock %}
+    </main>
+    </body>
+</div>
 </html>

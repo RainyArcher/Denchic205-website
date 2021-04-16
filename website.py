@@ -8,6 +8,7 @@ from data import db_session
 from data.posts import Posts
 from forms.posts import PostsForm
 from data.users import User
+from forms.settings import SettingsForm
 from forms.register import RegisterForm
 from forms.login_form import LoginForm
 
@@ -35,7 +36,7 @@ def login():
         return render_template('login.html',
                                message="Неправильный логин или пароль",
                                form=form)
-    return render_template('login.html', title='Авторизация', form=form)
+    return render_template('login.html', title='Авторизация', deletion=False, form=form)
 
 
 @app.route("/")
@@ -56,7 +57,7 @@ def Denchic205():
 @app.route('/settings/<int:id>', methods=['GET', 'POST'])
 @login_required
 def settings(id):
-    form = RegisterForm()
+    form = SettingsForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.id == id).first()
@@ -72,27 +73,34 @@ def settings(id):
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.id == id).first()
         if user:
-            if not current_user.check_password(form.password.data):
-                return render_template('register.html', title='Настройки',
-                                       form=form,
-                                       message="Неправильный пароль")
-            if form.password.data != form.password_again.data:
-                return render_template('register.html', title='Настройки',
-                                       form=form,
-                                       message="Пароли не совпадают")
             if form.avatar.data:
                 avatar = form.avatar.data
                 if avatar.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
-                    return render_template('register.html', title='Настройки',
+                    return render_template('settings.html', title='Настройки',
                                            form=form,
                                            message="Файл не является изображением")
                 avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).replace(
                     ":", "-") + '.' + avatar.filename.split('.')[-1]
-                if avatar_function(user.avatar) and os.path.isfile('static/img/avatars/' + user.avatar):
-                    os.remove('static/img/avatars/' + user.avatar)
-                avatar.save("static/img/avatars/" + avatar_name)
+                if avatar_function(user.avatar) and os.path.isfile('static/img/Avatars/' + user.avatar):
+                    os.remove('static/img/Avatars/' + user.avatar)
+                avatar.save("static/img/Avatars/" + avatar_name)
             else:
                 avatar_name = current_user.avatar
+            if form.old_password.data and form.new_password.data:
+                if not user.check_password(form.old_password.data):
+                    return render_template('settings.html', title='Настройки',
+                                           form=form,
+                                           message="Неправильный пароль")
+                elif form.old_password.data == form.new_password.data:
+                    return render_template('settings.html', title='Настройки',
+                                           form=form,
+                                           message="Пароли совпадают")
+                else:
+                    user.set_password(form.new_password.data)
+            elif form.new_password.data and not form.old_password.data:
+                return render_template('settings.html', title='Настройки',
+                                       form=form,
+                                       message="Введите предыдущий пароль, чтобы продолжить")
             user.surname = form.surname.data
             user.name = form.name.data
             user.age = form.age.data
@@ -100,12 +108,11 @@ def settings(id):
             user.avatar = avatar_name
             db_sess.merge(user)
             db_sess.commit()
+            print('aaa')
             return redirect('/')
         else:
             abort(404)
-    return render_template('register.html', title='Настройки',
-                           form=form)
-
+    return render_template('settings.html', title='Настройки', form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -133,7 +140,7 @@ def reqister():
                                        message="Файл не является изображением")
             avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).replace(":", "-") + \
                           '.' + avatar.filename.split('.')[-1]
-            avatar.save("static/img/avatars/" + avatar_name)
+            avatar.save("static/img/Avatars/" + avatar_name)
         user = User(
             surname=form.surname.data,
             name=form.name.data,
@@ -168,22 +175,22 @@ def delete_user(id):
         if form.validate_on_submit():
             db_sess = db_session.create_session()
             user = db_sess.query(User).filter(User.email == form.email.data).first()
-            if user and user.check_password(form.password.data):
+            if user and user.check_password(form.password.data) and user.email == current_user.email:
                 for post in user.posts:
-                    if os.path.isfile('static/img/' + post.image) and post.image != 'Empty.jpg':
-                        os.remove('static/img/' + post.image)
+                    if os.path.isfile('static/img/Posts/' + post.image) and post.image != 'Empty.png':
+                        os.remove('static/img/Posts/' + post.image)
                     db_sess.delete(post)
                     db_sess.commit()
                 print('All posts deleted')
-                if avatar_function(user.avatar) and os.path.isfile('static/img/avatars/' + user.avatar):
-                    os.remove('static/img/avatars/' + user.avatar)
+                if avatar_function(user.avatar) and os.path.isfile('static/img/Avatars/' + user.avatar):
+                    os.remove('static/img/Avatars/' + user.avatar)
                 db_sess.delete(user)
                 db_sess.commit()
                 return redirect("/")
             return render_template('login.html',
                                    message="Неправильный логин или пароль",
                                    form=form)
-        return render_template('login.html', title='Удаление пользователя', form=form)
+        return render_template('login.html', title='Удаление пользователя', deletion=True, form=form)
     else:
         abort(404)
 
@@ -194,6 +201,7 @@ def addPost():
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         posts = Posts()
+        posts.type = form.type.data
         if len(form.title.data) > 50:
             return render_template('addPost.html', title='Добавление записи',
                                    form=form,
@@ -205,7 +213,7 @@ def addPost():
                                    message="Слишком большое описание")
         posts.content = form.content.data
         if not form.image.data:
-            posts.image = 'Empty.jpg'
+            posts.image = 'Empty.png'
         else:
             image = form.image.data
             if image.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
@@ -214,7 +222,7 @@ def addPost():
                                        message="Файл не является изображением")
             filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
                        image.filename.split('.')[-1]
-            image.save("static/img/" + filename)
+            image.save("static/img/Posts/" + filename)
             posts.image = filename
         posts.is_private = form.is_private.data
         current_user.posts.append(posts)
@@ -233,6 +241,7 @@ def edit_post(id):
         db_sess = db_session.create_session()
         posts = db_sess.query(Posts).filter(Posts.id == id).first()
         if posts:
+            form.type.data = posts.type
             form.title.data = posts.title
             form.content.data = posts.content
             form.is_private.data = posts.is_private
@@ -242,6 +251,7 @@ def edit_post(id):
         db_sess = db_session.create_session()
         posts = db_sess.query(Posts).filter(Posts.id == id).first()
         if posts:
+            posts.type = form.type.data
             if len(form.title.data) > 50:
                 return render_template('addPost.html', title='Редактирование записи',
                                        form=form,
@@ -260,9 +270,9 @@ def edit_post(id):
                                            message="Файл не является изображением")
                 filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
                            image.filename.split('.')[-1]
-                image.save("static/img/" + filename)
-                if os.path.isfile('static/img/' + posts.image) and posts.image != 'Empty.jpg':
-                    os.remove('static/img/' + posts.image)
+                image.save("static/img/posts/" + filename)
+                if os.path.isfile('static/img/Posts/' + posts.image) and posts.image != 'Empty.png':
+                    os.remove('static/img/Posts/' + posts.image)
                 posts.image = filename
             posts.is_private = form.is_private.data
             db_sess.commit()
@@ -280,8 +290,8 @@ def post_delete(id):
     db_sess = db_session.create_session()
     posts = db_sess.query(Posts).filter(Posts.id == id).first()
     if posts:
-        if os.path.isfile('static/img/' + posts.image) and posts.image != 'Empty.jpg':
-            os.remove('static/img/' + posts.image)
+        if os.path.isfile('static/img/Posts/' + posts.image) and posts.image != 'Empty.png':
+            os.remove('static/img/Posts/' + posts.image)
         db_sess.delete(posts)
         db_sess.commit()
     else:

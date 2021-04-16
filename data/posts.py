@@ -11,6 +11,7 @@ class Posts(SqlAlchemyBase, UserMixin, SerializerMixin):
     date = str(datetime.datetime.now()).split('.')[0].split(' ')[0]
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
+    type = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     content = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     image = sqlalchemy.Column(sqlalchemy.String, nullable=True)

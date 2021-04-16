@@ -1,42 +1,92 @@
 {% extends "base.html" %}
 {% block content %}
 <meta charset="UTF-8">
-<h1>Posts</h1>
+<style>
+    .Types {
+        background-color: #ffffff;
+        width: 30%;
+        display: inline-block;
+        margin-top: 0;
+        margin-right: 25px;
+        float: right}
+
+</style>
+<h1 style="margin-left: 25px">Posts</h1>
 {% if not current_user.is_authenticated%}
-<h2>Please, register or log in to see the posts</h2>
+<h2 style="margin-left: 25px">Please, register or log in to see the posts</h2>
 {% elif not posts %}
-<a href="addPost" class="btn btn-secondary">Add a new post</a>
-<h2>No posts to show :(</h2>
-<h2>But you can add one! ^_^</h2>
+<a href="addPost" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
+<h2 style="margin-left: 25px">No posts to show :(</h2>
+<h2 style="margin-left: 25px">But you can add one! ^_^</h2>
 {% else %}
-<a href="addPost" class="btn btn-secondary">Add a new post</a>
-<hr style="width:45%;margin-left:0">
+<a href="addPost" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
+<div class="Types">
+    <h1 align="center">Post types</h1>
+    <ul type="None">
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/None.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - None</h2>
+            </div>
+        </li>
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/Gaming.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - Gaming</h2>
+            </div>
+        </li>
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/Life.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - Life</h2>
+            </div>
+        </li>
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/Programming.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - programming</h2>
+            </div>
+        </li>
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/Arting.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - Arting</h2>
+            </div>
+        </li>
+    </ul>
+</div>
+<hr style="width: 50%; margin-left:25px">
 {% for post in posts %}
 {% if ((post.is_private and current_user == post.user) or not post.is_private) and current_user.is_authenticated%}
-<h3>{{ post.created_date }}</h3>
-<h2 style="width:45%;word-wrap:break-word">{{ post.title.capitalize() }}</h2>
-<h5 style="width:45%;word-wrap:break-word">{{ post.content }}</h5>
-<img src="../static/img/{{ post.image }}" height="350" width="500">
-{% if post.is_private%}
-<h5>Private</h5>
-{% else%}
-<h5>Public</h5>
-{% endif %}
-<img src="../static/img/avatars/{{ post.user.avatar }}" height="75" width="75">
-<h4>Author: {{ post.user.name }} {{ post.user.surname }}</h4>
-{% endif %}
-{% if current_user.is_authenticated and current_user == post.user %}
-<div>
-    <a href="/posts/{{ post.id }}" class="btn btn-warning">
-        Edit
-    </a>
-    <a href="/post_delete/{{ post.id }}" class="btn btn-danger">
-        Delete
-    </a>
+<div style="background: rgba(255, 255, 255, 0.774); width:50%; margin-left: 25px">
+    <h3 style="margin-left: 25px">{{ post.created_date }}</h3>
+    <div style="display: inline-flex;">
+        <img style="margin-left: 25px" src="../static/img/Website/Types/{{ post.type }}.png" height="64" width="64">
+        <h2 style="word-wrap:break-word;margin-left: 25px">{{ post.title.capitalize() }}</h2>
+    </div>
+    <h5 style="word-wrap:break-word;margin-left: 25px">{{ post.content }}</h5>
+    <img src="../static/img/Posts/{{ post.image }}" height="500" width="725" hspace="25">
+    {% if post.is_private%}
+    <h3 style="margin-left: 25px">Private</h3>
+    {% else%}
+    <h3 style="margin-left: 25px">Public</h3>
+    {% endif %}
+    <img src="../static/img/Avatars/{{ post.user.avatar }}" height="75" width="75" style="margin-left: 25px">
+    <h3 style="margin-left: 25px">Author: {{ post.user.name }} {{ post.user.surname }}</h3>
+    {% endif %}
+    {% if current_user.is_authenticated and current_user == post.user %}
+    <div>
+        <a style="margin-left: 25px; margin-bottom: 5px" href="/posts/{{ post.id }}" class="btn btn-warning">
+            Edit
+        </a>
+        <a style="margin-bottom: 5px" href="/post_delete/{{ post.id }}" class="btn btn-danger">
+            Delete
+        </a>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
 {% if (post.is_private and current_user == post.user) or not post.is_private %}
-<hr style="width:45%;margin-left:0">
+<hr style="width: 50%; margin-left:25px">
 {% endif %}
 {% endfor %}
 {% endif%}
