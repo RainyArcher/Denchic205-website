@@ -14,10 +14,36 @@
 <h1 style="margin-left: 25px">Posts</h1>
 {% if not current_user.is_authenticated%}
 <h2 style="margin-left: 25px">Please, register or log in to see the posts</h2>
+<div style="background: rgba(255, 255, 255, 0.774); width:50%; margin-left: 25px">
+    <h3 style="margin-left: 25px">2020-04-14</h3>
+    <div style="display: inline-flex;">
+        <img style="margin-left: 25px" src="../static/img/Website/Types/Programming.png" height="64" width="64">
+        <h2 style="word-wrap:break-word;margin-left: 25px">Hey, log in to see something</h2>
+    </div>
+    <h5 style="word-wrap:break-word;margin-left: 25px">You should be a part of community to see the posts</h5>
+    <img src="../static/img/Posts/Empty.png" height="450" width="650" hspace="25" style="margin-left: 25px">
+    <h3 style="margin-left: 25px">Public</h3>
+    <img src="../static/img/Website/My icon.png" height="75" width="75" style="margin-left: 25px">
+    <h3 style="margin-left: 25px">Author: Denis Light</h3>
+</div>
+<hr style="width: 50%; margin-left:25px">
 {% elif not posts %}
 <a href="addPost" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
 <h2 style="margin-left: 25px">No posts to show :(</h2>
 <h2 style="margin-left: 25px">But you can add one! ^_^</h2>
+<div style="background: rgba(255, 255, 255, 0.774); width:50%; margin-left: 25px">
+    <h3 style="margin-left: 25px">2020-04-14</h3>
+    <div style="display: inline-flex;">
+        <img style="margin-left: 25px" src="../static/img/Website/Types/Programming.png" height="64" width="64">
+        <h2 style="word-wrap:break-word;margin-left: 25px">Add the first post!</h2>
+    </div>
+    <h5 style="word-wrap:break-word;margin-left: 25px">Be the first to add something here!</h5>
+    <img src="../static/img/Posts/Empty.png" height="450" width="650" hspace="25" style="margin-left: 25px">
+    <h3 style="margin-left: 25px">Public</h3>
+    <img src="../static/img/Website/My icon.png" height="75" width="75" style="margin-left: 25px">
+    <h3 style="margin-left: 25px">Author: Denis Light</h3>
+</div>
+<hr style="width: 50%; margin-left:25px">
 {% else %}
 <a href="addPost" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
 <div class="Types">
@@ -76,7 +102,7 @@
     {% endif %}
     {% if current_user.is_authenticated and current_user == post.user %}
     <div>
-        <a style="margin-left: 25px; margin-bottom: 5px" href="/posts/{{ post.id }}" class="btn btn-warning">
+        <a style="margin-left: 25px; margin-bottom: 5px" href="/edit_post/{{ post.id }}" class="btn btn-warning">
             Edit
         </a>
         <a style="margin-bottom: 5px" href="/post_delete/{{ post.id }}" class="btn btn-danger">

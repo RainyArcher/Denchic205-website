@@ -6,8 +6,9 @@
   background-image: url("../static/img/Website/Background.jpg");
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-size: cover
+  background-size: cover;
 }
+
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -16,8 +17,8 @@
     <link rel="stylesheet" type="text/css" href="../static/css/style.css"/>
     <title>{{title}}</title>
 </head>
+<body>
 <div class="background">
-    <body>
     <header>
         <nav class="navbar navbar-light bg-light">
             <div style="display: inline-flex;">
@@ -41,6 +42,6 @@
     <main role="main">
         {% block content %}{% endblock %}
     </main>
-    </body>
 </div>
+</body>
 </html>

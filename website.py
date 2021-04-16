@@ -61,7 +61,7 @@ def settings(id):
     if request.method == "GET":
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.id == id).first()
-        if user:
+        if user and current_user == user:
             form.email.data = current_user.email
             form.surname.data = current_user.surname
             form.name.data = current_user.name
@@ -170,11 +170,10 @@ def logout():
 def delete_user(id):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == id).first()
-    if user:
+    if user and user == current_user:
         form = LoginForm()
         if form.validate_on_submit():
             db_sess = db_session.create_session()
-            user = db_sess.query(User).filter(User.email == form.email.data).first()
             if user and user.check_password(form.password.data) and user.email == current_user.email:
                 for post in user.posts:
                     if os.path.isfile('static/img/Posts/' + post.image) and post.image != 'Empty.png':
@@ -200,20 +199,20 @@ def addPost():
     form = PostsForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        posts = Posts()
-        posts.type = form.type.data
+        post = Posts()
+        post.type = form.type.data
         if len(form.title.data) > 50:
             return render_template('addPost.html', title='Добавление записи',
                                    form=form,
                                    message="Слишком большой заголовок записи")
-        posts.title = form.title.data
+        post.title = form.title.data
         if len(form.content.data) > 300:
             return render_template('addPost.html', title='Добавление записи',
                                    form=form,
                                    message="Слишком большое описание")
-        posts.content = form.content.data
+        post.content = form.content.data
         if not form.image.data:
-            posts.image = 'Empty.png'
+            post.image = 'Empty.png'
         else:
             image = form.image.data
             if image.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
@@ -223,9 +222,9 @@ def addPost():
             filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
                        image.filename.split('.')[-1]
             image.save("static/img/Posts/" + filename)
-            posts.image = filename
-        posts.is_private = form.is_private.data
-        current_user.posts.append(posts)
+            post.image = filename
+        post.is_private = form.is_private.data
+        current_user.post.append(post)
         db_sess.merge(current_user)
         db_sess.commit()
         return redirect('/')
@@ -233,35 +232,35 @@ def addPost():
                            form=form)
 
 
-@app.route('/posts/<int:id>', methods=['GET', 'POST'])
+@app.route('/edit_post/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_post(id):
     form = PostsForm()
     if request.method == "GET":
         db_sess = db_session.create_session()
-        posts = db_sess.query(Posts).filter(Posts.id == id).first()
-        if posts:
-            form.type.data = posts.type
-            form.title.data = posts.title
-            form.content.data = posts.content
-            form.is_private.data = posts.is_private
+        post = db_sess.query(Posts).filter(Posts.id == id).first()
+        if post and post.user == current_user:
+            form.type.data = post.type
+            form.title.data = post.title
+            form.content.data = post.content
+            form.is_private.data = post.is_private
         else:
             abort(404)
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        posts = db_sess.query(Posts).filter(Posts.id == id).first()
-        if posts:
-            posts.type = form.type.data
+        post = db_sess.query(Posts).filter(Posts.id == id).first()
+        if post and post.user == current_user:
+            post.type = form.type.data
             if len(form.title.data) > 50:
                 return render_template('addPost.html', title='Редактирование записи',
                                        form=form,
                                        message="Слишком большой заголовок записи")
-            posts.title = form.title.data
+            post.title = form.title.data
             if len(form.content.data) > 300:
                 return render_template('addPost.html', title='Добавление записи',
                                        form=form,
                                        message="Слишком большое описание")
-            posts.content = form.content.data
+            post.content = form.content.data
             if form.image.data:
                 image = form.image.data
                 if image.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
@@ -271,10 +270,10 @@ def edit_post(id):
                 filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
                            image.filename.split('.')[-1]
                 image.save("static/img/posts/" + filename)
-                if os.path.isfile('static/img/Posts/' + posts.image) and posts.image != 'Empty.png':
-                    os.remove('static/img/Posts/' + posts.image)
-                posts.image = filename
-            posts.is_private = form.is_private.data
+                if os.path.isfile('static/img/Posts/' + post.image) and post.image != 'Empty.png':
+                    os.remove('static/img/Posts/' + post.image)
+                post.image = filename
+            post.is_private = form.is_private.data
             db_sess.commit()
             return redirect('/')
         else:
@@ -288,11 +287,11 @@ def edit_post(id):
 @login_required
 def post_delete(id):
     db_sess = db_session.create_session()
-    posts = db_sess.query(Posts).filter(Posts.id == id).first()
-    if posts:
-        if os.path.isfile('static/img/Posts/' + posts.image) and posts.image != 'Empty.png':
-            os.remove('static/img/Posts/' + posts.image)
-        db_sess.delete(posts)
+    post = db_sess.query(Posts).filter(Posts.id == id).first()
+    if post and current_user == post.user:
+        if os.path.isfile('static/img/Posts/' + post.image) and post.image != 'Empty.png':
+            os.remove('static/img/Posts/' + post.image)
+        db_sess.delete(post)
         db_sess.commit()
     else:
         abort(404)
