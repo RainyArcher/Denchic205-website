@@ -6,20 +6,17 @@ from flask_login import UserMixin
 from .db_session import SqlAlchemyBase
 
 
-class Posts(SqlAlchemyBase, UserMixin, SerializerMixin):
-    __tablename__ = 'posts'
+class Comments(SqlAlchemyBase, UserMixin, SerializerMixin):
+    __tablename__ = 'comments'
     date = str(datetime.datetime.now()).split('.')[0].split(' ')[0]
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
-    type = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    content = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    image = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    text = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.String,
                                      default=date)
-    is_private = sqlalchemy.Column(sqlalchemy.Boolean, default=True)
-
     user_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("users.id"))
+    post_id = sqlalchemy.Column(sqlalchemy.Integer,
+                                sqlalchemy.ForeignKey("posts.id"))
     user = orm.relation('User')
-    comments = orm.relation("Comments", back_populates='post')
+    post = orm.relation('Posts')

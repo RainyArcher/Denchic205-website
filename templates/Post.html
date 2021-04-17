@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<meta charset="UTF-8">
+{% if ((post.is_private and current_user == post.user) or not post.is_private) and current_user.is_authenticated%}
+<div style="background: rgba(255, 255, 255, 0.774); width:50%; margin-left: 350px; margin-top: 50px">
+    <h3 style="margin-left: 25px">{{ post.created_date }}</h3>
+    <div style="display: inline-flex;">
+        <img style="margin-left: 25px" src="../static/img/Website/Types/{{ post.type }}.png" height="64" width="64">
+        <h2 style="word-wrap:break-word;margin-left: 25px">{{ post.title.capitalize() }}</h2>
+    </div>
+    <h5 style="word-wrap:break-word;margin-left: 25px">{{ post.content }}</h5>
+    <img src="../static/img/Posts/{{ post.image }}" height="450" width="650" hspace="25">
+    {% if post.is_private%}
+    <h3 style="margin-left: 25px">Private</h3>
+    {% else%}
+    <h3 style="margin-left: 25px">Public</h3>
+    {% endif %}
+    <img src="../static/img/Avatars/{{ post.user.avatar }}" height="75" width="75" style="margin-left: 25px">
+    <h3 style="margin-left: 25px">Author: {{ post.user.name }} {{ post.user.surname }}</h3>
+    {% endif %}
+    {% if current_user.is_authenticated and current_user == post.user %}
+    <div>
+        <a style="margin-left: 25px; margin-bottom: 5px" href="/edit_post/{{ post.id }}" class="btn btn-warning">
+            Edit
+        </a>
+        <a style="margin-bottom: 5px" href="/post_delete/{{ post.id }}" class="btn btn-danger">
+            Delete
+        </a>
+    </div>
+    {% endif %}
+    <a href="/add_comment/{{ post.id }}" style="text-decoration: none">
+        <div style="display: inline-flex; border: 3px solid; margin-left: 25px; margin-bottom: 25px;">
+            <img src="../static/img/Website/Comment.png" width="50" height="50">
+            <h3 style="margin-left: 10px; margin-top: 7px; margin-right: 5px"><b>Comment</b></h3>
+        </div>
+    </a>
+    {% for comment in post_comments %}
+    <h3>{{ comment.user.name }} {{ comment.user.surname}}: {{ comment.text }}</h3>
+    {% endfor %}
+
+</div>
+<hr style="width: 50%; margin-left:25px">
+{% endblock %}

@@ -10,6 +10,8 @@
         margin-right: 25px;
         float: right}
 
+
+
 </style>
 <h1 style="margin-left: 25px">Posts</h1>
 {% if not current_user.is_authenticated%}
@@ -21,13 +23,13 @@
         <h2 style="word-wrap:break-word;margin-left: 25px">Hey, log in to see something</h2>
     </div>
     <h5 style="word-wrap:break-word;margin-left: 25px">You should be a part of community to see the posts</h5>
-    <img src="../static/img/Posts/Empty.png" height="450" width="650" hspace="25" style="margin-left: 25px">
+    <img src="../static/img/Posts/Empty.png" height="450" width="650" hspace="20" style="margin-left: 25px">
     <h3 style="margin-left: 25px">Public</h3>
     <img src="../static/img/Website/My icon.png" height="75" width="75" style="margin-left: 25px">
     <h3 style="margin-left: 25px">Author: Denis Light</h3>
 </div>
 <hr style="width: 50%; margin-left:25px">
-{% elif not posts %}
+{% elif not posts or all_private%}
 <a href="addPost" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
 <h2 style="margin-left: 25px">No posts to show :(</h2>
 <h2 style="margin-left: 25px">But you can add one! ^_^</h2>
@@ -38,7 +40,7 @@
         <h2 style="word-wrap:break-word;margin-left: 25px">Add the first post!</h2>
     </div>
     <h5 style="word-wrap:break-word;margin-left: 25px">Be the first to add something here!</h5>
-    <img src="../static/img/Posts/Empty.png" height="450" width="650" hspace="25" style="margin-left: 25px">
+    <img src="../static/img/Posts/Empty.png" height="450" width="650" hspace="20" style="margin-left: 25px">
     <h3 style="margin-left: 25px">Public</h3>
     <img src="../static/img/Website/My icon.png" height="75" width="75" style="margin-left: 25px">
     <h3 style="margin-left: 25px">Author: Denis Light</h3>
@@ -88,10 +90,12 @@
     <h3 style="margin-left: 25px">{{ post.created_date }}</h3>
     <div style="display: inline-flex;">
         <img style="margin-left: 25px" src="../static/img/Website/Types/{{ post.type }}.png" height="64" width="64">
-        <h2 style="word-wrap:break-word;margin-left: 25px">{{ post.title.capitalize() }}</h2>
+        <a class="navbar-brand" href="http://127.0.0.1:8080/post/{{ post.id }}"><h2
+                style="word-wrap:break-word;margin-left: 25px">{{
+            post.title.capitalize() }}</h2></a>
     </div>
     <h5 style="word-wrap:break-word;margin-left: 25px">{{ post.content }}</h5>
-    <img src="../static/img/Posts/{{ post.image }}" height="450" width="650" hspace="25">
+    <img src="../static/img/Posts/{{ post.image }}" height="450" width="650" hspace="20">
     {% if post.is_private%}
     <h3 style="margin-left: 25px">Private</h3>
     {% else%}

@@ -6,14 +6,16 @@ import random
 import os
 from data import db_session
 from data.posts import Posts
-from forms.posts import PostsForm
 from data.users import User
+from data.comments import Comments
+from forms.posts import PostsForm
 from forms.settings import SettingsForm
 from forms.register import RegisterForm
 from forms.login_form import LoginForm
+from forms.comments import CommentsForm
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+app.config['SECRET_KEY'] = 'denchic205_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -46,7 +48,14 @@ def index():
     posts = db_sess.query(Posts).all()
     users = db_sess.query(User).all()
     names = {name.id: (name.surname, name.name) for name in users}
-    return render_template("index.html", posts=posts, names=names, title='Denchic205 main')
+    count = 0
+    all_private = False
+    for post in posts:
+        if post.is_private:
+            count += 1
+    if len(posts) == count:
+        all_private = True
+    return render_template("index.html", posts=posts, names=names, all_private=all_private, title='Denchic205 main')
 
 
 @app.route('/Denchic205')
@@ -108,7 +117,6 @@ def settings(id):
             user.avatar = avatar_name
             db_sess.merge(user)
             db_sess.commit()
-            print('aaa')
             return redirect('/')
         else:
             abort(404)
@@ -178,6 +186,8 @@ def delete_user(id):
                 for post in user.posts:
                     if os.path.isfile('static/img/Posts/' + post.image) and post.image != 'Empty.png':
                         os.remove('static/img/Posts/' + post.image)
+                    # for comment in user.comments:
+                    # db_sess.delete(comment)
                     db_sess.delete(post)
                     db_sess.commit()
                 print('All posts deleted')
@@ -194,7 +204,27 @@ def delete_user(id):
         abort(404)
 
 
+@app.route('/add_comment/<int:id>', methods=['GET', 'POST'])
+@login_required
+def add_comment(id):
+    form = CommentsForm()
+    db_sess = db_session.create_session()
+    post = db_sess.query(Posts).filter(Posts.id == id).first()
+    if form.validate_on_submit():
+        comment = Comments()
+        comment.text = form.text.data
+        comment.post_id = id
+        current_user.comments.append(comment)
+        db_sess.merge(current_user)
+        db_sess.merge(db_sess.query(Posts).filter(Posts.id == id).first())
+        db_sess.commit()
+        return redirect(f'/post/{id}')
+    return render_template('Comment.html', title='Добавление комментария',
+                           form=form, post=post)
+
+
 @app.route('/addPost', methods=['GET', 'POST'])
+@login_required
 def addPost():
     form = PostsForm()
     if form.validate_on_submit():
@@ -224,7 +254,7 @@ def addPost():
             image.save("static/img/Posts/" + filename)
             post.image = filename
         post.is_private = form.is_private.data
-        current_user.post.append(post)
+        current_user.posts.append(post)
         db_sess.merge(current_user)
         db_sess.commit()
         return redirect('/')
@@ -291,11 +321,26 @@ def post_delete(id):
     if post and current_user == post.user:
         if os.path.isfile('static/img/Posts/' + post.image) and post.image != 'Empty.png':
             os.remove('static/img/Posts/' + post.image)
+        for comment in post.comments:
+            db_sess.delete(comment)
         db_sess.delete(post)
         db_sess.commit()
     else:
         abort(404)
     return redirect('/')
+
+
+@app.route('/post/<int:id>')
+@login_required
+def post(id):
+    db_sess = db_session.create_session()
+    post = db_sess.query(Posts).filter(Posts.id == id).first()
+    post_comments = db_sess.query(Comments).filter(Comments.post_id == id).all()
+    if post:
+        return render_template('Post.html',
+                               title=f'Post {post.id}', post=post, post_comments=post_comments)
+    else:
+        abort(404)
 
 
 def avatar_function(input):

@@ -9,6 +9,8 @@
   background-size: cover;
 }
 
+
+
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -22,11 +24,11 @@
     <header>
         <nav class="navbar navbar-light bg-light">
             <div style="display: inline-flex;">
-                <img src="../static/img/Website/My icon.png" width="75" height="75">
+                <img src="../static/img/Website/My icon.png" width="75" height="75" style="margin-left: 5px">
                 <a class="navbar-brand" href="http://127.0.0.1:8080/"><h1>Denchic205 Main</h1></a>
             </div>
             {% if current_user.is_authenticated %}
-            <img src="../static/img/avatars/{{current_user.avatar}}" width="75" height="75">
+            <img src="../static/img/avatars/{{current_user.avatar}}" width="75" height="75" style="margin-top: 5px">
             <h2>{{ current_user.name }} {{ current_user.surname }}</h2>
             <a class="btn btn-secondary" href="/settings/{{ current_user.id }}">Settings</a>
             <a href="/logout" class="btn btn-danger">Log out</a>
