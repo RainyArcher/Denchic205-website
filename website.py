@@ -219,28 +219,6 @@ def delete_user(id):
         abort(404)
 
 
-@app.route('/add_comment/<int:id>', methods=['GET', 'POST'])
-@login_required
-def add_comment(id):
-    form = CommentsForm()
-    db_sess = db_session.create_session()
-    post = db_sess.query(Posts).filter(Posts.id == id).first()
-    if not post.is_private or (post.is_private and post.user == current_user):
-        if form.validate_on_submit():
-            comment = Comments()
-            comment.text = form.text.data
-            comment.post_id = id
-            current_user.comments.append(comment)
-            db_sess.merge(current_user)
-            db_sess.merge(db_sess.query(Posts).filter(Posts.id == id).first())
-            db_sess.commit()
-            return redirect(f'/post/{id}')
-        return render_template('Comment.html', title='Добавление комментария',
-                               form=form, post=post)
-    else:
-        abort(404)
-
-
 @app.route('/addPost', methods=['GET', 'POST'])
 @login_required
 def addPost():
@@ -346,6 +324,33 @@ def post_delete(id):
     else:
         abort(404)
     return redirect('/')
+
+
+@app.route('/add_comment/<int:id>', methods=['GET', 'POST'])
+@login_required
+def add_comment(id):
+    form = CommentsForm()
+    db_sess = db_session.create_session()
+    post = db_sess.query(Posts).filter(Posts.id == id).first()
+    if not post.is_private or (post.is_private and post.user == current_user):
+        if form.validate_on_submit():
+            comment = Comments()
+            if len(form.text.data) > 200:
+                return render_template('Comment.html', title='Добавление комментария',
+                                       form=form,
+                                       message="Слишком большой комментарий, пожалуйста, введите не более 200 символов")
+            comment.text = form.text.data
+            comment.post_id = id
+            current_user.comments.append(comment)
+            db_sess.merge(current_user)
+            db_sess.merge(db_sess.query(Posts).filter(Posts.id == id).first())
+            db_sess.commit()
+            db_sess.close()
+            return redirect(f'/post/{id}')
+        return render_template('Comment.html', title='Добавление комментария',
+                               form=form, post=post)
+    else:
+        abort(404)
 
 
 @app.route('/comment_delete/<int:id>', methods=['GET', 'POST'])

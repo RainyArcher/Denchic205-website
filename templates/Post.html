@@ -37,20 +37,24 @@
     <p></p>
     {% if post_comments %}
     <h3 align="center">Comments</h3>
+    <hr style="width: 50%; margin-left:25px">
     {% endif %}
     {% for comment in post_comments %}
     <div style="display: inline-flex;">
         <img src="../static/img/Avatars/{{ comment.user.avatar }}" height="64" width="64"
              style="margin-left: 25px; margin-bottom: 25px;">
-        <h3 style="word-wrap:break-word; width: 50%">{{ comment.user.name }} {{ comment.user.surname}}: {{ comment.text
-            }}</h3>
+        <h3>{{ comment.user.name }} {{ comment.user.surname}}</h3>
+        <h4 style="word-wrap:break-word; margin-left: 30px; width: 300px">{{ comment.text }}</h4>
         {% if current_user == comment.user %}
-        <a style="margin-bottom: 5px" href="/comment_delete/{{ comment.id }}" class="btn btn-danger">
-            Delete
-        </a>
+        <div style="position: relative; left: 50px">
+            <a style="margin-bottom: 5px" href="/comment_delete/{{ comment.id }}" class="btn btn-danger">
+                Delete
+            </a>
+        </div>
         {% endif %}
+        <p></p>
     </div>
-    <p></p>
+    <hr style="margin-left:25px; margin-right: 25px">
     {% endfor %}
     {% endif %}
 </div>
