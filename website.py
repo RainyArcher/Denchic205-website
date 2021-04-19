@@ -337,7 +337,7 @@ def add_comment(id):
             comment = Comments()
             if len(form.text.data) > 200:
                 return render_template('Comment.html', title='Добавление комментария',
-                                       form=form,
+                                       form=form, post=post,
                                        message="Слишком большой комментарий, пожалуйста, введите не более 200 символов")
             comment.text = form.text.data
             comment.post_id = id
