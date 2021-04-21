@@ -55,6 +55,9 @@
     </p>
     {% endfor %}
     <p>
+        {{ form.role.label }}<br>
+        {{ form.role(class="form-control") }}<br>
+    <p>
         {{ form.address.label }}<br>
         {{ form.address(class="form-control") }}<br>
         {% for error in form.address.errors %}

@@ -9,9 +9,6 @@
         margin-top: 0;
         margin-right: 25px;
         float: right}
-
-
-
 </style>
 <h1 style="margin-left: 25px">Posts</h1>
 {% if not current_user.is_authenticated%}
@@ -29,17 +26,15 @@
     <h3 style="margin-left: 25px">Author: Denis Light</h3>
 </div>
 <hr style="width: 50%; margin-left:25px">
-{% elif not posts or all_private%}
-<a href="addPost" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
+{% elif not posts or all_private %}
 <h2 style="margin-left: 25px">No posts to show :(</h2>
-<h2 style="margin-left: 25px">But you can add one! ^_^</h2>
 <div style="background: rgba(255, 255, 255, 0.774); width:50%; margin-left: 25px">
     <h3 style="margin-left: 25px">2020-04-14</h3>
     <div style="display: inline-flex;">
         <img style="margin-left: 25px" src="../static/img/Website/Types/Programming.png" height="64" width="64">
-        <h2 style="word-wrap:break-word;margin-left: 25px">Add the first post!</h2>
+        <h2 style="word-wrap:break-word;margin-left: 25px">No posts</h2>
     </div>
-    <h5 style="word-wrap:break-word;margin-left: 25px">Be the first to add something here!</h5>
+    <h5 style="word-wrap:break-word;margin-left: 25px">Sorry, no posts to show here!</h5>
     <img src="../static/img/Posts/Empty.png" height="450" width="650" hspace="20" style="margin-left: 25px">
     <h3 style="margin-left: 25px">Public</h3>
     <img src="../static/img/Website/My icon.png" height="75" width="75" style="margin-left: 25px">
@@ -47,7 +42,9 @@
 </div>
 <hr style="width: 50%; margin-left:25px">
 {% else %}
-<a href="addPost" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
+{% if current_user.is_authenticated and current_user.role == "Admin" %}
+    <a href="add_post" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
+{% endif %}
 <div class="Types">
     <h1 align="center">Post types</h1>
     <ul type="None">
@@ -97,26 +94,29 @@
     <h5 style="word-wrap:break-word;margin-left: 25px">{{ post.content }}</h5>
     <img src="../static/img/Posts/{{ post.image }}" height="450" width="650" hspace="20">
     {% if post.is_private%}
-    <h3 style="margin-left: 25px">Private</h3>
+        <h3 style="margin-left: 25px">Private</h3>
     {% else%}
-    <h3 style="margin-left: 25px">Public</h3>
+        <h3 style="margin-left: 25px">Public</h3>
     {% endif %}
     <img src="../static/img/Avatars/{{ post.user.avatar }}" height="75" width="75" style="margin-left: 25px">
     <h3 style="margin-left: 25px">Author: {{ post.user.name }} {{ post.user.surname }}</h3>
-    {% endif %}
     {% if current_user.is_authenticated and current_user == post.user %}
-    <div>
-        <a style="margin-left: 25px; margin-bottom: 5px" href="/edit_post/{{ post.id }}" class="btn btn-warning">
-            Edit
-        </a>
-        <a style="margin-bottom: 5px" href="/post_delete/{{ post.id }}" class="btn btn-danger">
-            Delete
-        </a>
-    </div>
+        <div>
+            <a style="margin-left: 25px; margin-bottom: 5px" href="/edit_post/{{ post.id }}" class="btn btn-warning">
+                Edit
+            </a>
+            <a style="margin-bottom: 5px" href="/delete_post/{{ post.id }}" class="btn btn-danger">
+                Delete
+            </a>
+        </div>
+    {% endif %}
+    {% if (post.is_private and current_user == post.user) or not post.is_private %}
+        <a style="margin-left: 25px; margin-bottom: 5px; margin-top: 5px" class="btn btn-info" href="/post/{{ post.id }}">Comments</a>
     {% endif %}
 </div>
 {% if (post.is_private and current_user == post.user) or not post.is_private %}
-<hr style="width: 50%; margin-left:25px">
+    <hr style="width: 50%; margin-left:25px">
+{% endif %}
 {% endif %}
 {% endfor %}
 {% endif%}

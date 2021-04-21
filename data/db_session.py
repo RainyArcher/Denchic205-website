@@ -15,10 +15,10 @@ def global_init(db_file):
         return
 
     if not db_file or not db_file.strip():
-        raise Exception("Необходимо указать файл базы данных.")
+        raise Exception("You need to enter a name of your database.")
 
     conn_str = 'sqlite:///' + db_file.strip()
-    print(f"Подключение к базе данных по адресу {conn_str}")
+    print(f"Connecting database {conn_str}")
 
     engine = sa.create_engine(conn_str, echo=False, connect_args={'check_same_thread': False}
 )

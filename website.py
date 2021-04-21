@@ -35,9 +35,9 @@ def login():
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
         return render_template('login.html',
-                               message="Неправильный логин или пароль",
+                               message="Incorrect login or password",
                                form=form)
-    return render_template('login.html', title='Авторизация', deletion=False, form=form)
+    return render_template('login.html', title='Authorisation', deletion=False, form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -45,50 +45,61 @@ def reqister():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html', title='Registration',
                                    form=form,
-                                   message="Пароли не совпадают")
+                                   message="Passwords don't match")
         db_session.global_init("db/users.db")
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html', title='Registration',
                                    form=form,
-                                   message="Такой пользователь уже есть")
-        print('Adding user...')
+                                   message="This user is already exists")
         if not form.avatar.data:
             avatar_name = avatar_function('')
         else:
             avatar = form.avatar.data
             if avatar.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
-                return render_template('register.html', title='Регистрация',
+                return render_template('register.html', title='Registration',
                                        form=form,
-                                       message="Файл не является изображением")
+                                       message="This file is not an image")
             avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).replace(":", "-") + \
                           '.' + avatar.filename.split('.')[-1]
             avatar.save("static/img/Avatars/" + avatar_name)
+        if len(form.surname.data) >= 20:
+            return render_template('register.html', title='Registration',
+                                   form=form,
+                                   message="Your surname is so big, please, enter up to 20 characters")
+        if len(form.name.data) >= 15:
+            return render_template('register.html', title='Registration',
+                                   form=form,
+                                   message="Your name is so big, please, enter up to 15 characters")
         if not form.age.data.isnumeric() or int(form.age.data) > 200:
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html', title='Registration',
                                    form=form,
-                                   message="Пожалуйста, введите корректный возраст")
+                                   message="Please, enter your correct age")
         if int(form.age.data) < 12:
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html', title='Registration',
                                    form=form,
-                                   message="Простите, на сайте действует возрастное ограничение 12+")
+                                   message="We are sorry, this website is only for 12+ users")
         user = User(
-            surname=form.surname.data,
-            name=form.name.data,
-            age=form.age.data,
-            address=form.address.data,
-            email=form.email.data,
+            surname=form.surname.data.strip()[0].upper() + form.surname.data.strip()[1:],
+            name=form.name.data.strip()[0].upper() + form.name.data.strip()[1:],
+            age=form.age.data.strip(),
+            role=form.role.data.strip(),
+            address=form.address.data.strip(),
+            email=form.email.data.strip(),
             avatar=avatar_name,
         )
-        user.set_password(form.password.data)
+        if check_user_password(form.password.data) != True:
+            return render_template('register.html', title='Registration',
+                                   form=form,
+                                   message=check_user_password(form.password.data))
+        user.set_password(form.password.data.strip())
         db_sess.add(user)
         db_sess.commit()
-        print('User added')
         logout_user()
         return redirect('/login')
-    return render_template('register.html', title='Регистрация', form=form)
+    return render_template('register.html', title='Registration', form=form)
 
 
 @app.route("/")
@@ -124,6 +135,7 @@ def settings(id):
             form.surname.data = current_user.surname
             form.name.data = current_user.name
             form.age.data = current_user.age
+            form.role.data = current_user.role
             form.address.data = current_user.address
         else:
             abort(404)
@@ -134,9 +146,9 @@ def settings(id):
             if form.avatar.data:
                 avatar = form.avatar.data
                 if avatar.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
-                    return render_template('settings.html', title='Настройки',
+                    return render_template('settings.html', title='Settings',
                                            form=form,
-                                           message="Файл не является изображением")
+                                           message="This file is not an image")
                 avatar_name = 'Avatar_' + form.email.data + '_' + str(datetime.datetime.now()).replace(
                     ":", "-") + '.' + avatar.filename.split('.')[-1]
                 if avatar_function(user.avatar) and os.path.isfile('static/img/Avatars/' + user.avatar):
@@ -145,39 +157,48 @@ def settings(id):
             else:
                 avatar_name = current_user.avatar
             if form.old_password.data and form.new_password.data:
-                if not user.check_password(form.old_password.data):
-                    return render_template('settings.html', title='Настройки',
+                if not user.check_password(form.old_password.data.strip()):
+                    return render_template('settings.html', title='Settings',
                                            form=form,
-                                           message="Неправильный пароль")
-                elif form.old_password.data == form.new_password.data:
-                    return render_template('settings.html', title='Настройки',
+                                           message="Wrong password")
+                elif form.old_password.data.strip() == form.new_password.data.strip():
+                    return render_template('settings.html', title='Settings',
                                            form=form,
-                                           message="Пароли совпадают")
+                                           message="These passwords are same")
                 else:
-                    user.set_password(form.new_password.data)
+                    user.set_password(form.new_password.data.strip())
             elif form.new_password.data and not form.old_password.data:
-                return render_template('settings.html', title='Настройки',
+                return render_template('settings.html', title='Settings',
                                        form=form,
-                                       message="Введите предыдущий пароль, чтобы продолжить")
-            user.surname = form.surname.data
-            user.name = form.name.data
+                                       message="Please, enter the previous password to continue")
+            if len(form.surname.data) >= 20:
+                return render_template('settings.html', title='Settings',
+                                       form=form,
+                                       message="Your surname is so big, please, enter up to 20 characters")
+            if len(form.name.data) >= 15:
+                return render_template('settings.html', title='Settings',
+                                       form=form,
+                                       message="Your name is so big, please, enter up to 15 characters")
+            user.surname = form.surname.data.strip()[0].upper() + form.surname.data.strip()[1:]
+            user.name = form.name.data.strip()[0].upper() + form.name.data.strip()[1:]
             if not form.age.data.isnumeric() or int(form.age.data) > 200:
-                return render_template('settings.html', title='Настройки',
+                return render_template('settings.html', title='Settings',
                                        form=form,
-                                       message="Пожалуйста, введите корректный возраст")
+                                       message="Please, enter your correct age")
             if int(form.age.data) < 12:
-                return render_template('settings.html', title='Настройки',
+                return render_template('settings.html', title='Settings',
                                        form=form,
-                                       message="Простите, на сайте действует возрастное ограничение 12+")
-            user.age = form.age.data
-            user.address = form.address.data
+                                       message="We are sorry, this website is only for 12+ users")
+            user.age = form.age.data.strip()
+            user.role = form.role.data
+            user.address = form.address.data.strip()
             user.avatar = avatar_name
             db_sess.merge(user)
             db_sess.commit()
             return redirect('/')
         else:
             abort(404)
-    return render_template('settings.html', title='Настройки', form=form)
+    return render_template('settings.html', title='Settings', form=form)
 
 
 @app.route('/logout')
@@ -195,67 +216,71 @@ def delete_user(id):
     if user and user == current_user:
         form = LoginForm()
         if form.validate_on_submit():
-            if user and user.check_password(form.password.data) and user.email == current_user.email:
+            if user and user.check_password(form.password.data) and (
+                    user.email == form.email.data):
                 for post in user.posts:
                     if os.path.isfile('static/img/Posts/' + post.image) and post.image != 'Empty.png':
                         os.remove('static/img/Posts/' + post.image)
                     for comment in post.comments:
                         db_sess.delete(comment)
                     db_sess.delete(post)
-                print('All posts deleted')
                 for comment in user.comments:
                     db_sess.delete(comment)
-                print('All comments deleted')
                 if avatar_function(user.avatar) and os.path.isfile('static/img/Avatars/' + user.avatar):
                     os.remove('static/img/Avatars/' + user.avatar)
                 db_sess.delete(user)
                 db_sess.commit()
                 return redirect("/")
             return render_template('login.html',
-                                   message="Неправильный логин или пароль",
+                                   title='Log in to delete your account',
+                                   deletion=True,
+                                   message="Incorrect login or password",
                                    form=form)
-        return render_template('login.html', title='Удаление пользователя', deletion=True, form=form)
+        return render_template('login.html', title='Log in to delete your account', deletion=True, form=form)
     else:
         abort(404)
 
 
-@app.route('/addPost', methods=['GET', 'POST'])
+@app.route('/add_post', methods=['GET', 'POST'])
 @login_required
-def addPost():
-    form = PostsForm()
-    if form.validate_on_submit():
-        db_sess = db_session.create_session()
-        post = Posts()
-        post.type = form.type.data
-        if len(form.title.data) > 50:
-            return render_template('addPost.html', title='Добавление записи',
-                                   form=form,
-                                   message="Слишком большой заголовок записи")
-        post.title = form.title.data
-        if len(form.content.data) > 300:
-            return render_template('addPost.html', title='Добавление записи',
-                                   form=form,
-                                   message="Слишком большое описание")
-        post.content = form.content.data
-        if not form.image.data:
-            post.image = 'Empty.png'
-        else:
-            image = form.image.data
-            if image.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
-                return render_template('addPost.html', title='Добавление записи',
+def add_post():
+    if current_user.role == 'Admin':
+        form = PostsForm()
+        if form.validate_on_submit():
+            db_sess = db_session.create_session()
+            post = Posts()
+            post.type = form.type.data
+            if len(form.title.data) > 50:
+                return render_template('addPost.html', title='Adding a post',
                                        form=form,
-                                       message="Файл не является изображением")
-            filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
-                       image.filename.split('.')[-1]
-            image.save("static/img/Posts/" + filename)
-            post.image = filename
-        post.is_private = form.is_private.data
-        current_user.posts.append(post)
-        db_sess.merge(current_user)
-        db_sess.commit()
-        return redirect('/')
-    return render_template('addPost.html', title='Добавление записи',
-                           form=form)
+                                       message="This title is too big, please, enter up to 50 characters")
+            post.title = form.title.data
+            if len(form.content.data) > 300:
+                return render_template('addPost.html', title='Adding a post',
+                                       form=form,
+                                       message="This content is too big, please, enter up to 300 characters")
+            post.content = form.content.data
+            if not form.image.data:
+                post.image = 'Empty.png'
+            else:
+                image = form.image.data
+                if image.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
+                    return render_template('addPost.html', title='Adding a post',
+                                           form=form,
+                                           message="This file is not an image")
+                filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
+                           image.filename.split('.')[-1]
+                image.save("static/img/Posts/" + filename)
+                post.image = filename
+            post.is_private = form.is_private.data
+            current_user.posts.append(post)
+            db_sess.merge(current_user)
+            db_sess.commit()
+            return redirect('/')
+        return render_template('addPost.html', title='Adding a post',
+                               form=form)
+    else:
+        abort(404)
 
 
 @app.route('/edit_post/<int:id>', methods=['GET', 'POST'])
@@ -278,21 +303,21 @@ def edit_post(id):
         if post and post.user == current_user:
             post.type = form.type.data
             if len(form.title.data) > 50:
-                return render_template('addPost.html', title='Редактирование записи',
+                return render_template('addPost.html', title='Editing a post',
                                        form=form,
-                                       message="Слишком большой заголовок записи")
+                                       message="This title is too big, please, enter up to 50 characters")
             post.title = form.title.data
             if len(form.content.data) > 300:
-                return render_template('addPost.html', title='Добавление записи',
+                return render_template('addPost.html', title='Editing a post',
                                        form=form,
-                                       message="Слишком большое описание")
+                                       message="This content is too big, please, enter up to 300 characters")
             post.content = form.content.data
             if form.image.data:
                 image = form.image.data
                 if image.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
-                    return render_template('addPost.html', title='Добавление записи',
+                    return render_template('addPost.html', title='Editing a post',
                                            form=form,
-                                           message="Файл не является изображением")
+                                           message="This file is not an image")
                 filename = 'post ' + str(datetime.datetime.now()).replace(":", "-") + '.' + \
                            image.filename.split('.')[-1]
                 image.save("static/img/posts/" + filename)
@@ -305,13 +330,13 @@ def edit_post(id):
         else:
             abort(404)
     return render_template('addPost.html',
-                           title='Редактирование записи',
+                           title='Editing a post',
                            form=form)
 
 
-@app.route('/post_delete/<int:id>', methods=['GET', 'POST'])
+@app.route('/delete_post/<int:id>', methods=['GET', 'POST'])
 @login_required
-def post_delete(id):
+def delete_post(id):
     db_sess = db_session.create_session()
     post = db_sess.query(Posts).filter(Posts.id == id).first()
     if post and current_user == post.user:
@@ -332,13 +357,14 @@ def add_comment(id):
     form = CommentsForm()
     db_sess = db_session.create_session()
     post = db_sess.query(Posts).filter(Posts.id == id).first()
-    if not post.is_private or (post.is_private and post.user == current_user):
+    if post and (not post.is_private or (
+            post.is_private and post.user == current_user)) and current_user.role != "Spectator":
         if form.validate_on_submit():
             comment = Comments()
             if len(form.text.data) > 200:
-                return render_template('Comment.html', title='Добавление комментария',
+                return render_template('Comment.html', title='Adding a comment',
                                        form=form, post=post,
-                                       message="Слишком большой комментарий, пожалуйста, введите не более 200 символов")
+                                       message="This comment is too big, please, enter up to 200 characters")
             comment.text = form.text.data
             comment.post_id = id
             current_user.comments.append(comment)
@@ -347,14 +373,15 @@ def add_comment(id):
             db_sess.commit()
             db_sess.close()
             return redirect(f'/post/{id}')
-        return render_template('Comment.html', title='Добавление комментария',
+        return render_template('Comment.html', title='Adding a comment',
                                form=form, post=post)
     else:
         abort(404)
 
 
-@app.route('/comment_delete/<int:id>', methods=['GET', 'POST'])
-def comment_delete(id):
+@app.route('/delete_comment/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_comment(id):
     db_sess = db_session.create_session()
     comment = db_sess.query(Comments).filter(Comments.id == id).first()
     post_id = comment.post_id
@@ -378,6 +405,16 @@ def post(id):
                                title=f'Post {post.id}', post=post, post_comments=post_comments)
     else:
         abort(404)
+
+
+def check_user_password(password):
+    if len(password.strip()) < 6:
+        return 'Your password must include 6 or more characters'
+    if password.strip() == 'password' or '123' in password or 'abc' in password:
+        return 'Your password is so simple'
+    if ' ' in password:
+        return "Your password mustn't include any spaces"
+    return True
 
 
 def avatar_function(input):

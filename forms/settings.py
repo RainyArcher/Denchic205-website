@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField, StringField, PasswordField, FileField
+from wtforms import SubmitField, StringField, PasswordField, FileField, SelectField
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import DataRequired
 
@@ -9,6 +9,7 @@ class SettingsForm(FlaskForm):
     surname = StringField('Surname', validators=[DataRequired()])
     name = StringField('Name', validators=[DataRequired()])
     age = StringField('Age', validators=[DataRequired()])
+    role = SelectField('Post type', choices=["User", "Spectator", "Admin"])
     old_password = PasswordField('Old password')
     new_password = PasswordField('New password')
     avatar = FileField('Image File')

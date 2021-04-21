@@ -55,6 +55,9 @@
     </p>
     {% endfor %}
     <p>
+        {{ form.role.label }}<br>
+        {{ form.role(class="form-control") }}<br>
+    <p>
         {{ form.address.label }}<br>
         {{ form.address(class="form-control") }}<br>
         {% for error in form.address.errors %}
@@ -64,10 +67,9 @@
     {% endfor %}
     <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
     {{message}}
-    {% if current_user.is_authenticated %}
+    <p></p>
     <a href="/delete_user/{{ current_user.id }}" class="btn btn-danger">
         Delete
     </a>
-    {% endif %}
 </form>
 {% endblock %}

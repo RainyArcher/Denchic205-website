@@ -23,31 +23,33 @@
         <a style="margin-left: 25px; margin-bottom: 5px" href="/edit_post/{{ post.id }}" class="btn btn-warning">
             Edit
         </a>
-        <a style="margin-bottom: 5px" href="/post_delete/{{ post.id }}" class="btn btn-danger">
+        <a style="margin-bottom: 5px" href="/delete_post/{{ post.id }}" class="btn btn-danger">
             Delete
         </a>
     </div>
     {% endif %}
+    {% if current_user.is_authenticated and current_user.role != "Spectator" %}
     <a href="/add_comment/{{ post.id }}" style="text-decoration: none">
         <div style="display: inline-flex; border: 3px solid; margin-left: 25px;">
             <img src="../static/img/Website/Comment.png" width="50" height="50">
             <h3 style="margin-left: 10px; margin-top: 7px; margin-right: 5px"><b>Comment</b></h3>
         </div>
     </a>
+    {% endif %}
     <p></p>
     {% if post_comments %}
     <h3 align="center">Comments</h3>
-    <hr style="width: 50%; margin-left:25px">
+    <hr style="margin-left:25px; margin-right: 25px">
     {% endif %}
     {% for comment in post_comments[::-1] %}
     <div style="display: inline-flex;">
         <img src="../static/img/Avatars/{{ comment.user.avatar }}" height="64" width="64"
-             style="margin-left: 25px; margin-bottom: 25px;">
-        <h3>{{ comment.user.name }} {{ comment.user.surname}}</h3>
+             style="margin-left: 25px">
+        <h3 style="word-wrap:break-word;width: 180px">{{ comment.user.name }} {{ comment.user.surname}}</h3>
         <h4 style="word-wrap:break-word; margin-left: 30px; width: 300px">{{ comment.text }}</h4>
         {% if current_user == comment.user %}
         <div style="position: relative; left: 15px">
-            <a style="margin-bottom: 5px" href="/comment_delete/{{ comment.id }}" class="btn btn-danger">
+            <a style="margin-bottom: 5px" href="/delete_comment/{{ comment.id }}" class="btn btn-danger">
                 Delete
             </a>
         </div>

@@ -5,9 +5,9 @@ from flask_wtf.file import FileField
 
 
 class PostsForm(FlaskForm):
-    type = SelectField('Тип поста', choices=["None", "Life", "Programming", "Gaming", "Arting"])
-    title = StringField('Заголовок', validators=[DataRequired()])
-    content = TextAreaField("Содержание")
+    type = SelectField('Post type', choices=["None", "Life", "Programming", "Gaming", "Arting"])
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField("Content")
     image = FileField('Image File')
-    is_private = BooleanField("Личное")
-    submit = SubmitField('Применить')
+    is_private = BooleanField("Private")
+    submit = SubmitField('Submit')
