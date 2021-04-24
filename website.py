@@ -534,7 +534,8 @@ def avatar_function(input):
 def main():
     # Подключаем базу к приложению и запускаем его на сервере
     db_session.global_init("db/users.db")
-    app.run(port=8080, host='127.0.0.1')
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':
