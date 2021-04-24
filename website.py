@@ -395,7 +395,7 @@ def edit_post(id):
                                            message="This file is not an image")
                 filename = 'Post ' + str(datetime.datetime.now()).replace(":", "-") + f' {current_user.id}' + '.' + \
                            image.filename.split('.')[-1]
-                image.save("static/img/posts/" + filename)
+                image.save("static/img/Posts/" + filename)
                 # Изображение проверяется на нахождение в папке и на то, является ли оно изображением по умолчанию
                 # Если нет, стираем его из хранилища
                 if os.path.isfile('static/img/Posts/' + post.image) and post.image != 'Empty.png':
