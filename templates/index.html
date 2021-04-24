@@ -28,6 +28,45 @@
 <hr style="width: 50%; margin-left:25px">
 {% elif not posts or all_private %}
 <h2 style="margin-left: 25px">No posts to show :(</h2>
+{% if current_user.is_authenticated and current_user.role == "Admin" %}
+    <a href="add_post" class="btn btn-secondary" style="margin-left: 25px">Add a new post</a>
+{% endif %}
+<hr style="width: 50%; margin-left:25px">
+<div class="Types">
+    <h1 align="center">Post types</h1>
+    <ul type="None">
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/None.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - None</h2>
+            </div>
+        </li>
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/Gaming.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - Gaming</h2>
+            </div>
+        </li>
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/Life.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - Life</h2>
+            </div>
+        </li>
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/Programming.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - Programming</h2>
+            </div>
+        </li>
+        <li>
+            <div style="display: inline-flex; position: right">
+                <img src="../static/img/Website/Types/Arting.png" height="64" width="64">
+                <h2 style="word-wrap:break-word">Type - Arting</h2>
+            </div>
+        </li>
+    </ul>
+</div>
 <div style="background: rgba(255, 255, 255, 0.774); width:50%; margin-left: 25px">
     <h3 style="margin-left: 25px">2020-04-14</h3>
     <div style="display: inline-flex;">

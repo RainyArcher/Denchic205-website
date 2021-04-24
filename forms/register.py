@@ -5,6 +5,10 @@ from wtforms.validators import DataRequired
 
 
 class RegisterForm(FlaskForm):
+    # Форма регистрации пользователя, включает в себя его email, пароль и его повторение, фамилию, имя, возраст, аватар,
+    # адрес, роль
+    # Форма создана с помощью FlaskForm, включает в себя компоненты wtforms
+    # Все поля, кроме роли (так как в любом случае роль будет заполнена) и аватара - обязательные для заполнения
     email = EmailField('Login / email', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     password_again = PasswordField('Repeat password', validators=[DataRequired()])
