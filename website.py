@@ -521,7 +521,7 @@ def avatar_function(input):
     # False, значит аватар - системный
     avatars = ['Avatar_red.png', 'Avatar_orange', 'Avatar_yellow.png', 'Avatar_lime.png',
                'Avatar_green.png', 'Avatar_blue.png', 'Avatar_dark-blue.png',
-               'Avatar_purple', 'Avatar_pink.png', 'Avatar_grey.png', 'black.png']
+               'Avatar_purple', 'Avatar_pink.png', 'Avatar_grey.png', 'Avatar_black.png']
     if input != '':
         if input in avatars:
             return False
@@ -534,7 +534,8 @@ def avatar_function(input):
 def main():
     # Подключаем базу к приложению и запускаем его на сервере
     db_session.global_init("db/users.db")
-    app.run(port=8080, host='127.0.0.1')
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':
