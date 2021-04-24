@@ -521,7 +521,7 @@ def avatar_function(input):
     # False, значит аватар - системный
     avatars = ['Avatar_red.png', 'Avatar_orange', 'Avatar_yellow.png', 'Avatar_lime.png',
                'Avatar_green.png', 'Avatar_blue.png', 'Avatar_dark-blue.png',
-               'Avatar_purple', 'Avatar_pink.png', 'Avatar_grey.png', 'black.png']
+               'Avatar_purple', 'Avatar_pink.png', 'Avatar_grey.png', 'Avatar_black.png']
     if input != '':
         if input in avatars:
             return False
