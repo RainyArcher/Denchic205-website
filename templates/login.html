@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1 align="center">{{ title }}</h1>
-<form action="" method="post" class="container">
+<form style="height: 500px" action="" method="post" class="container">
     {{ form.hidden_tag() }}
     <p>
         {{ form.email.label }}<br>
@@ -23,7 +23,7 @@
     {% if not deletion %}
     <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
     {% endif %}
-    <p style="margin-bottom: 200px">{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
     <div>{{ message }}</div>
 </form>
 {% endblock %}
