@@ -18,5 +18,4 @@ class SettingsForm(FlaskForm):
     old_password = PasswordField('Old password')
     new_password = PasswordField('New password')
     avatar = FileField('Image File')
-    address = StringField('Address', validators=[DataRequired()])
     submit = SubmitField('Submit')

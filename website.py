@@ -62,78 +62,82 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 # Функция регистрации на сайте
 def register():
-    # Используется форма регистрации
-    form = RegisterForm()
-    # Если форма заполнена...
-    if form.validate_on_submit():
-        # Несовмещение паролей обрабатывается
-        if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Registration',
-                                   form=form,
-                                   message="Passwords don't match")
-        # Создаётся сессия в базе данных, обрабатывается возможность того, что пользователь уже существует
-        db_sess = db_session.create_session()
-        if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Registration',
-                                   form=form,
-                                   message="This user is already exists")
-        # Вызывается функция генерации случайного аватара, если он не был загружен
-        if not form.avatar.data:
-            avatar_name = avatar_function('')
-        else:
-            # Если аватар был указан, он загружается в папку и указвается пользователю в базу данных
-            avatar = form.avatar.data
-            # Обрабатывается возможность того, что загруженный файл не является картинкой
-            if avatar.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
+    # Только для новых пользователей, иначе - ошибка 404
+    if not current_user.is_authenticated:
+        # Используется форма регистрации
+        form = RegisterForm()
+        # Если форма заполнена...
+        if form.validate_on_submit():
+            # Несовмещение паролей обрабатывается
+            if form.password.data != form.password_again.data:
                 return render_template('register.html', title='Registration',
                                        form=form,
-                                       message="This file is not an image")
-            # Имя аватара имеет вид Avatar {email пользователя} {текущая дата}
-            avatar_name = 'Avatar ' + form.email.data + ' ' + str(datetime.datetime.now()).replace(":", "-") + \
-                          '.' + avatar.filename.split('.')[-1]
-            # Аватар сохраняется в папку static/img/Avatars/{Имя аватара}
-            avatar.save("static/img/Avatars/" + avatar_name)
-        # Проверка на фамилию, имя и возраст
-        # Длина фамилии - не больше 20, имени - не более 15
-        if len(form.surname.data) >= 20:
-            return render_template('register.html', title='Registration',
-                                   form=form,
-                                   message="Your surname is so big, please, enter up to 20 characters")
-        if len(form.name.data) >= 15:
-            return render_template('register.html', title='Registration',
-                                   form=form,
-                                   message="Your name is so big, please, enter up to 15 characters")
-        # Возраст - не менее 12 и не более 200
-        if not form.age.data.isnumeric() or int(form.age.data) > 200:
-            return render_template('register.html', title='Registration',
-                                   form=form,
-                                   message="Please, enter your correct age")
-        if int(form.age.data) < 12:
-            return render_template('register.html', title='Registration',
-                                   form=form,
-                                   message="We are sorry, this website is only for 12+ users")
-        # Если пользователь успешно зарегестрировался, добавляем его в базу, имя и фамилию пишем с большой буквы,
-        # имя аватара пользователя также добавляется в базу.
-        user = User(
-            surname=form.surname.data.strip()[0].upper() + form.surname.data.strip()[1:],
-            name=form.name.data.strip()[0].upper() + form.name.data.strip()[1:],
-            age=form.age.data.strip(),
-            role=form.role.data.strip(),
-            email=form.email.data.strip(),
-            avatar=avatar_name,
-        )
-        # Пароль перед сохранением проверяется на надёжность и длину
-        if check_user_password(form.password.data) != True:
-            return render_template('register.html', title='Registration',
-                                   form=form,
-                                   message=check_user_password(form.password.data))
-        user.set_password(form.password.data.strip())
-        db_sess.add(user)
-        # Сохраняем данные в базе и выводим пользователя из системы для дальнейшего входа
-        db_sess.commit()
-        logout_user()
-        return redirect('/login')
-    return render_template('register.html', title='Registration', form=form)
+                                       message="Passwords don't match")
+            # Создаётся сессия в базе данных, обрабатывается возможность того, что пользователь уже существует
+            db_sess = db_session.create_session()
+            if db_sess.query(User).filter(User.email == form.email.data).first():
+                return render_template('register.html', title='Registration',
+                                       form=form,
+                                       message="This user is already exists")
+            # Вызывается функция генерации случайного аватара, если он не был загружен
+            if not form.avatar.data:
+                avatar_name = avatar_function('')
+            else:
+                # Если аватар был указан, он загружается в папку и указвается пользователю в базу данных
+                avatar = form.avatar.data
+                # Обрабатывается возможность того, что загруженный файл не является картинкой
+                if avatar.filename.split('.')[-1] not in ['png', 'jpeg', 'jpg', 'ico', 'gif', 'bmp']:
+                    return render_template('register.html', title='Registration',
+                                           form=form,
+                                           message="This file is not an image")
+                # Имя аватара имеет вид Avatar {email пользователя} {текущая дата}
+                avatar_name = 'Avatar ' + form.email.data + ' ' + str(datetime.datetime.now()).replace(":", "-") + \
+                              '.' + avatar.filename.split('.')[-1]
+                # Аватар сохраняется в папку static/img/Avatars/{Имя аватара}
+                avatar.save("static/img/Avatars/" + avatar_name)
+            # Проверка на фамилию, имя и возраст
+            # Длина фамилии - не больше 20, имени - не более 15
+            if len(form.surname.data) >= 20:
+                return render_template('register.html', title='Registration',
+                                       form=form,
+                                       message="Your surname is so big, please, enter up to 20 characters")
+            if len(form.name.data) >= 15:
+                return render_template('register.html', title='Registration',
+                                       form=form,
+                                       message="Your name is so big, please, enter up to 15 characters")
+            # Возраст - не менее 12 и не более 200
+            if not form.age.data.isnumeric() or int(form.age.data) > 200:
+                return render_template('register.html', title='Registration',
+                                       form=form,
+                                       message="Please, enter your correct age")
+            if int(form.age.data) < 12:
+                return render_template('register.html', title='Registration',
+                                       form=form,
+                                       message="We are sorry, this website is only for 12+ users")
+            # Если пользователь успешно зарегестрировался, добавляем его в базу, имя и фамилию пишем с большой буквы,
+            # имя аватара пользователя также добавляется в базу.
+            user = User(
+                surname=form.surname.data.strip()[0].upper() + form.surname.data.strip()[1:],
+                name=form.name.data.strip()[0].upper() + form.name.data.strip()[1:],
+                age=form.age.data.strip(),
+                role=form.role.data.strip(),
+                email=form.email.data.strip(),
+                avatar=avatar_name,
+            )
+            # Пароль перед сохранением проверяется на надёжность и длину
+            if check_user_password(form.password.data) != True:
+                return render_template('register.html', title='Registration',
+                                       form=form,
+                                       message=check_user_password(form.password.data))
+            user.set_password(form.password.data.strip())
+            db_sess.add(user)
+            # Сохраняем данные в базе и выводим пользователя из системы для дальнейшего входа
+            db_sess.commit()
+            logout_user()
+            return redirect('/login')
+        return render_template('register.html', title='Registration', form=form)
+    else:
+        abort(404)
 
 
 @app.route("/")
@@ -209,9 +213,9 @@ def settings(id):
                 else:
                     # Если ошибок нет, проверяем надёжность пароля и сохраняем его пользователю
                     if check_user_password(form.new_password.data) != True:
-                        return render_template('register.html', title='Registration',
+                        return render_template('settings.html', title='Settings',
                                                form=form,
-                                               message=check_user_password(form.password.data))
+                                               message=check_user_password(form.new_password.data))
                     user.set_password(form.new_password.data.strip())
             # Необычные проверки на пароли, пользователю необходимо заполнить поля, иначе - ошибка
             elif form.new_password.data and not form.old_password.data:
@@ -238,6 +242,7 @@ def settings(id):
                                        form=form,
                                        message="We are sorry, this website is only for 12+ users")
             # Как и при регистрации, все данные сохраняются
+            print('gor')
             user.age = form.age.data.strip()
             user.role = form.role.data
             user.avatar = avatar_name

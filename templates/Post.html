@@ -41,7 +41,7 @@
     <h3 align="center">Comments</h3>
     <hr style="margin-left:25px; margin-right: 25px">
     {% endif %}
-    {% for comment in post_comments[::-1] %}
+    {% for comment in post_comments %}
     <div style="display: inline-flex;">
         <img src="../static/img/Avatars/{{ comment.user.avatar }}" height="64" width="64"
              style="margin-left: 25px">

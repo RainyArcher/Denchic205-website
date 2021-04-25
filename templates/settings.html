@@ -14,7 +14,7 @@
         {{ error }}
     </p>
     {% endfor %}
-     <p>
+    <p>
         {{ form.old_password.label }}<br>
         {{ form.old_password(class="form-control", type="password") }}<br>
         {% for error in form.old_password.errors %}
@@ -61,7 +61,7 @@
     {{message}}
     <p></p>
     <a href="/delete_user/{{ current_user.id }}" class="btn btn-danger">
-        Delete
+        Delete user
     </a>
 </form>
 {% endblock %}
