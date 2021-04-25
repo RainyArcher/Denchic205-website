@@ -519,9 +519,9 @@ def avatar_function(input):
     # Функция, которая при отсутствии аргумента возвращает имя аватара пользователя случайного цвета
     # При наличии аргумента функция возвращает, является ли этот аватар пользовательским
     # False, значит аватар - системный
-    avatars = ['Avatar_red.png', 'Avatar_orange', 'Avatar_yellow.png', 'Avatar_lime.png',
+    avatars = ['Avatar_red.png', 'Avatar_orange.png', 'Avatar_yellow.png', 'Avatar_lime.png',
                'Avatar_green.png', 'Avatar_blue.png', 'Avatar_dark-blue.png',
-               'Avatar_purple', 'Avatar_pink.png', 'Avatar_grey.png', 'Avatar_black.png']
+               'Avatar_purple.png', 'Avatar_pink.png', 'Avatar_grey.png', 'Avatar_black.png']
     if input != '':
         if input in avatars:
             return False
