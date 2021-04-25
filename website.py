@@ -119,7 +119,6 @@ def register():
             name=form.name.data.strip()[0].upper() + form.name.data.strip()[1:],
             age=form.age.data.strip(),
             role=form.role.data.strip(),
-            address=form.address.data.strip(),
             email=form.email.data.strip(),
             avatar=avatar_name,
         )
@@ -174,7 +173,6 @@ def settings(id):
             form.name.data = current_user.name
             form.age.data = current_user.age
             form.role.data = current_user.role
-            form.address.data = current_user.address
         else:
             abort(404)
     if form.validate_on_submit():
@@ -242,7 +240,6 @@ def settings(id):
             # Как и при регистрации, все данные сохраняются
             user.age = form.age.data.strip()
             user.role = form.role.data
-            user.address = form.address.data.strip()
             user.avatar = avatar_name
             db_sess.merge(user)
             db_sess.commit()

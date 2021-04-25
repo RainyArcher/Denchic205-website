@@ -16,6 +16,5 @@ class RegisterForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     age = StringField('Age', validators=[DataRequired()])
     avatar = FileField('Image File')
-    address = StringField('Address', validators=[DataRequired()])
     role = SelectField('Role', choices=["User", "Admin", "Spectator"])
     submit = SubmitField('Submit')

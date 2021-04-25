@@ -17,7 +17,6 @@ class User(SqlAlchemyBase, UserMixin):
     surname = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     age = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    address = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     avatar = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True, nullable=True)
     role = sqlalchemy.Column(sqlalchemy.String, default="User")
